@@ -23,55 +23,42 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: gradle
 
-      # ── 3. Set up Android SDK ─────────────────────────────────────────────
+      # ── 3. Set up Gradle 8.9 (no wrapper JAR needed) ─────────────────────
+      #    gradle/actions/setup-gradle installs Gradle directly when
+      #    gradle-version is specified — bypasses the wrapper JAR entirely.
+      - name: Setup Gradle 8.9
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: "8.9"
+          cache-read-only: false
+
+      # ── 4. Set up Android SDK ─────────────────────────────────────────────
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
       - name: Accept Android SDK licenses
         run: yes | sdkmanager --licenses || true
 
-      - name: Install Android build tools & platform
+      - name: Install required Android SDK components
         run: |
           sdkmanager \
             "platform-tools" \
             "platforms;android-34" \
             "build-tools;34.0.0"
 
-      # ── 4. Download Gradle Wrapper JAR ────────────────────────────────────
-      - name: Download Gradle Wrapper JAR
-        run: |
-          mkdir -p gradle/wrapper
-          curl -L --retry 3 -o gradle/wrapper/gradle-wrapper.jar \
-            "https://github.com/gradle/gradle/raw/v8.9.0/gradle/wrapper/gradle-wrapper.jar"
-
-      - name: Make gradlew executable
-        run: chmod +x gradlew
-
-      # ── 5. Cache Gradle packages ──────────────────────────────────────────
-      - name: Cache Gradle packages
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: ${{ runner.os }}-gradle-
-
-      # ── 6. Build the APK ──────────────────────────────────────────────────
+      # ── 5. Build the APK using 'gradle' directly (no ./gradlew needed) ───
       - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace
+        run: gradle assembleDebug --project-dir . --stacktrace
         env:
           ANDROID_HOME: ${{ env.ANDROID_HOME }}
 
-      # ── 7. Rename APK to RecordPro.apk ───────────────────────────────────
+      # ── 6. Rename & upload APK ────────────────────────────────────────────
       - name: Rename APK
         run: |
           mkdir -p output
           cp app/build/outputs/apk/debug/app-debug.apk output/RecordPro.apk
 
-      # ── 8. Upload APK as artifact ─────────────────────────────────────────
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
@@ -79,9 +66,12 @@ jobs:
           path: output/RecordPro.apk
           retention-days: 30
 
-      # ── 9. Show APK info ──────────────────────────────────────────────────
-      - name: Show APK size
+      - name: Build summary
         run: |
-          echo "✅ Build successful!"
+          echo "✅ RecordPro APK built successfully!"
           ls -lh output/RecordPro.apk
-          echo "📱 Download the APK from the 'Artifacts' section above"
+          echo ""
+          echo "📱 To install on Samsung A32:"
+          echo "   1. Download RecordPro-APK from Artifacts above"
+          echo "   2. Transfer to phone via USB or WhatsApp"
+          echo "   3. Install via file manager (allow unknown sources)"
