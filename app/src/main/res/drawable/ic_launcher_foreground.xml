@@ -5,64 +5,63 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- Background circle gradient -->
+    <!-- Dark navy background fill -->
     <path
         android:fillColor="#0D1B2A"
         android:pathData="M0,0 L108,0 L108,108 L0,108 Z" />
 
-    <!-- Microphone body -->
+    <!-- Microphone body (blue) -->
     <path
         android:fillColor="#1E90FF"
         android:pathData="M54,22 C48.48,22 44,26.48 44,32 L44,54 C44,59.52 48.48,64 54,64 C59.52,64 64,59.52 64,54 L64,32 C64,26.48 59.52,22 54,22 Z" />
 
-    <!-- Microphone stand arc -->
-    <path
-        android:fillColor="#00D4FF"
-        android:pathData="M38,54 C38,62.84 45.16,70 54,70 C62.84,70 70,62.84 70,54"
-        android:strokeWidth="4"
-        android:strokeColor="#00D4FF"
-        android:fillColor="@android:color/transparent" />
-
-    <!-- Stand pole -->
+    <!-- Microphone stand pole -->
     <path
         android:fillColor="#00D4FF"
         android:pathData="M52,70 L52,80 L56,80 L56,70 Z" />
 
-    <!-- Stand base -->
+    <!-- Microphone stand base -->
     <path
         android:fillColor="#1E90FF"
-        android:pathData="M44,80 L64,80 L64,84 L44,84 Z"
-        android:strokeWidth="2"
-        android:strokeColor="#00D4FF" />
+        android:pathData="M44,80 L64,80 L64,84 L44,84 Z" />
 
-    <!-- Sound wave lines (right) -->
+    <!-- Stand arc (stroke only, rendered as filled stroked shape) -->
     <path
+        android:fillColor="#00000000"
         android:strokeColor="#00D4FF"
-        android:strokeWidth="3"
-        android:strokeLineCap="round"
-        android:fillColor="@android:color/transparent"
-        android:pathData="M74,40 C80,44 80,64 74,68" />
+        android:strokeWidth="4"
+        android:pathData="M38,54 C38,62.84 45.16,70 54,70 C62.84,70 70,62.84 70,54" />
 
+    <!-- Sound wave right outer -->
     <path
+        android:fillColor="#00000000"
         android:strokeColor="#1E90FF"
         android:strokeWidth="2.5"
         android:strokeLineCap="round"
-        android:fillColor="@android:color/transparent"
         android:pathData="M80,34 C90,41 90,67 80,74" />
 
-    <!-- Sound wave lines (left) -->
+    <!-- Sound wave right inner -->
     <path
+        android:fillColor="#00000000"
         android:strokeColor="#00D4FF"
         android:strokeWidth="3"
         android:strokeLineCap="round"
-        android:fillColor="@android:color/transparent"
-        android:pathData="M34,40 C28,44 28,64 34,68" />
+        android:pathData="M74,40 C80,44 80,64 74,68" />
 
+    <!-- Sound wave left outer -->
     <path
+        android:fillColor="#00000000"
         android:strokeColor="#1E90FF"
         android:strokeWidth="2.5"
         android:strokeLineCap="round"
-        android:fillColor="@android:color/transparent"
         android:pathData="M28,34 C18,41 18,67 28,74" />
+
+    <!-- Sound wave left inner -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#00D4FF"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:pathData="M34,40 C28,44 28,64 34,68" />
 
 </vector>
