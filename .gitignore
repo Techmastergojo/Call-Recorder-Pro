@@ -1,0 +1,21 @@
+*.iml
+.gradle
+/local.properties
+/.idea
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# APK outputs (built by CI)
+*.apk
+*.aab
+
+# Gradle wrapper JAR (downloaded by CI)
+gradle/wrapper/gradle-wrapper.jar
+
+# Android Studio generated
+*.hprof
+.navigation

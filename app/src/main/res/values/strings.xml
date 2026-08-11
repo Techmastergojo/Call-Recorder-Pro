@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">RecordPro</string>
+    <string name="accessibility_service_label">RecordPro WhatsApp Detector</string>
+    <string name="accessibility_service_description">RecordPro uses Accessibility Service only to detect when a WhatsApp call is active, so it can automatically start recording. It does NOT read any messages, contacts, or other personal data.</string>
+</resources>
