@@ -229,13 +229,15 @@ private fun WaveformVisualizer(isPlaying: Boolean) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         repeat(bars) { i ->
+            val duration = remember(isPlaying) { if (isPlaying) (300..700).random() else 1000 }
+            val targetVal = remember(isPlaying) { if (isPlaying) (8..40).random().toFloat() else 4f }
             val animatedHeight by rememberInfiniteTransition(label = "wave_$i").animateFloat(
                 initialValue = 4f,
-                targetValue = if (isPlaying) (8..40).random().toFloat() else 4f,
-                animationSpec = if (isPlaying) infiniteRepeatable(
-                    tween((300..700).random(), easing = FastOutSlowInEasing),
-                    RepeatMode.Reverse
-                ) else snap(),
+                targetValue = targetVal,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(duration, easing = FastOutSlowInEasing),
+                    repeatMode = RepeatMode.Reverse
+                ),
                 label = "bar_$i"
             )
             Box(
