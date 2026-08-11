@@ -63,11 +63,13 @@ class WhatsAppRecorderService : Service() {
     private var outputFile: File? = null
     private var phoneNumber: String = "WhatsApp"
     private var direction: String = "UNKNOWN"
+    private var isSimCall: Boolean = false
     private val scope = CoroutineScope(Dispatchers.IO)
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             WhatsAppCallDetector.ACTION_CALL_STARTED -> {
+                isSimCall = false
                 phoneNumber = intent.getStringExtra(WhatsAppCallDetector.EXTRA_PHONE_NUMBER)
                     ?: "WhatsApp"
                 direction = intent.getStringExtra(WhatsAppCallDetector.EXTRA_DIRECTION)
@@ -75,6 +77,17 @@ class WhatsAppRecorderService : Service() {
                 startRecording()
             }
             WhatsAppCallDetector.ACTION_CALL_ENDED -> {
+                stopRecording()
+            }
+            PhoneCallReceiver.ACTION_SIM_CALL_STARTED -> {
+                isSimCall = true
+                phoneNumber = intent.getStringExtra(WhatsAppCallDetector.EXTRA_PHONE_NUMBER)
+                    ?: "SIM Call"
+                direction = intent.getStringExtra(WhatsAppCallDetector.EXTRA_DIRECTION)
+                    ?: "UNKNOWN"
+                startSimRecording()
+            }
+            PhoneCallReceiver.ACTION_SIM_CALL_ENDED -> {
                 stopRecording()
             }
         }
@@ -223,12 +236,20 @@ class WhatsAppRecorderService : Service() {
         stopSelf()
     }
 
+    private fun startSimRecording() {
+        createNotificationChannel()
+        startForeground(NOTIFICATION_ID, buildNotification("Recording phone call…"))
+        startMicOnlyRecording()
+    }
+
     private fun buildOutputFile(): File {
-        val dir = File(getExternalFilesDir(null), "WhatsApp").also { it.mkdirs() }
+        val folder = if (isSimCall) "SIM" else "WhatsApp"
+        val prefix = if (isSimCall) "SIM" else "WA"
+        val dir = File(getExternalFilesDir(null), folder).also { it.mkdirs() }
         val ts = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
         val safeName = phoneNumber.replace("[^\\w+]".toRegex(), "_")
         val suffix = when (direction) { "INCOMING" -> "_IN"; "OUTGOING" -> "_OUT"; else -> "" }
-        return File(dir, "WA_${ts}_${safeName}${suffix}.wav")
+        return File(dir, "${prefix}_${ts}_${safeName}${suffix}.wav")
     }
 
     private fun createNotificationChannel() {

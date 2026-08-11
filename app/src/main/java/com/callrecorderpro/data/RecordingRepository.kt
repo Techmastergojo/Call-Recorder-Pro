@@ -23,6 +23,10 @@ class RecordingRepository(private val context: Context) {
     val whatsappRecordingDir: File
         get() = File(context.getExternalFilesDir(null), "WhatsApp").also { it.mkdirs() }
 
+    /** Directory where RecordPro saves custom direct SIM recordings */
+    val simRecordingDir: File
+        get() = File(context.getExternalFilesDir(null), "SIM").also { it.mkdirs() }
+
     /**
      * Fetch all recordings from both sources, enriched with call log data.
      */
@@ -30,12 +34,15 @@ class RecordingRepository(private val context: Context) {
         coroutineScope {
             val samsungDeferred   = async { samsungScanner.scan() }
             val whatsappDeferred  = async { scanWhatsAppRecordings() }
+            val directSimDeferred = async { scanDirectSimRecordings() }
 
             val samsung   = samsungDeferred.await()
             val whatsapp  = whatsappDeferred.await()
-            val combined  = (samsung + whatsapp).sortedByDescending { it.timestampMs }
+            val directSim = directSimDeferred.await()
+            
+            val combined  = (samsung + whatsapp + directSim).sortedByDescending { it.timestampMs }
 
-            // Enrich all SIM recordings with call log data (name, direction)
+            // Enrich all SIM and custom recordings with call log data (name, direction)
             callLogMatcher.enrich(combined)
         }
     }
@@ -119,6 +126,52 @@ class RecordingRepository(private val context: Context) {
             r.release()
             (ms / 1000).toInt()
         } catch (e: Exception) { 0 }
+    }
+
+    private fun scanDirectSimRecordings(): List<RecordingItem> {
+        val dir = simRecordingDir
+        if (!dir.exists()) return emptyList()
+
+        return dir.listFiles()
+            ?.filter { it.isFile && it.extension.lowercase() in setOf("m4a", "aac", "wav") }
+            ?.mapNotNull { file -> parseDirectSimFile(file) }
+            ?.sortedByDescending { it.timestampMs }
+            ?: emptyList()
+    }
+
+    private fun parseDirectSimFile(file: File): RecordingItem? {
+        return try {
+            val name = file.nameWithoutExtension // e.g. SIM_20240811_143022_+923001234567
+            val parts = name.split("_")
+
+            val dateStr = parts.getOrNull(1) ?: ""
+            val timeStr = parts.getOrNull(2) ?: ""
+            val phone   = parts.drop(3).joinToString("_")
+
+            val tsMs = parseWaTimestamp(dateStr, timeStr)
+            val duration = getAudioDuration(file.absolutePath)
+
+            val direction = when {
+                name.endsWith("_IN")  -> Direction.INCOMING
+                name.endsWith("_OUT") -> Direction.OUTGOING
+                else                  -> Direction.UNKNOWN
+            }
+
+            RecordingItem(
+                id = file.absolutePath,
+                callerName = null,
+                phoneNumber = phone.replace("_IN","").replace("_OUT",""),
+                direction = direction,
+                type = RecordingType.SIM,
+                timestampMs = tsMs,
+                durationSeconds = duration,
+                fileUri = Uri.fromFile(file),
+                fileSizeBytes = file.length(),
+                fileName = file.name
+            )
+        } catch (e: Exception) {
+            null
+        }
     }
 
     fun deleteRecording(item: RecordingItem): Boolean {

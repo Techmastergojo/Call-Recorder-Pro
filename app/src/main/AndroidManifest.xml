@@ -9,6 +9,7 @@
     <!-- Call log & contacts for caller name, number, direction -->
     <uses-permission android:name="android.permission.READ_CALL_LOG" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <!-- Microphone — YOUR voice in WhatsApp calls -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
@@ -69,6 +70,15 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Phone call receiver: triggers direct MIC recording for SIM calls -->
+        <receiver
+            android:name=".recorder.PhoneCallReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.PHONE_STATE" />
             </intent-filter>
         </receiver>
 

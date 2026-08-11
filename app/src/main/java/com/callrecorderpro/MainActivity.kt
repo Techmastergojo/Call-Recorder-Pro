@@ -86,6 +86,7 @@ fun RecordProApp() {
             add(Manifest.permission.RECORD_AUDIO)
             add(Manifest.permission.READ_CALL_LOG)
             add(Manifest.permission.READ_CONTACTS)
+            add(Manifest.permission.READ_PHONE_STATE)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 add(Manifest.permission.READ_MEDIA_AUDIO)
                 add(Manifest.permission.POST_NOTIFICATIONS)
