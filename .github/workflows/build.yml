@@ -9,8 +9,9 @@ on:
 
 jobs:
   build:
-    name: Build Debug APK
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       # ── 1. Checkout code ──────────────────────────────────────────────────
@@ -58,7 +59,7 @@ jobs:
         run: |
           mkdir -p output
           cp app/build/outputs/apk/debug/app-debug.apk output/RecordPro.apk
-
+        # ── 8. Upload APK as artifact ─────────────────────────────────────────
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
@@ -66,12 +67,29 @@ jobs:
           path: output/RecordPro.apk
           retention-days: 30
 
+      # ── 9. Create/Update GitHub Release (No Login Direct Download) ────────
+      - name: Update Latest Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: "RecordPro Latest Build"
+          body: |
+            This is the automatically built APK of RecordPro.
+            
+            ### 📱 Installation Instructions:
+            1. Click **RecordPro.apk** below to download directly to your Samsung A32.
+            2. Open the file on your phone to install.
+            3. Grant the required permissions on launch.
+          files: output/RecordPro.apk
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build summary
         run: |
-          echo "✅ RecordPro APK built successfully!"
+          echo "✅ RecordPro APK built and released successfully!"
           ls -lh output/RecordPro.apk
           echo ""
-          echo "📱 To install on Samsung A32:"
-          echo "   1. Download RecordPro-APK from Artifacts above"
-          echo "   2. Transfer to phone via USB or WhatsApp"
-          echo "   3. Install via file manager (allow unknown sources)"
+          echo "📱 Direct download URL for your dad:"
+          echo "   https://github.com/Techmastergojo/Call-Recorder-Pro/releases/latest/download/RecordPro.apk"
